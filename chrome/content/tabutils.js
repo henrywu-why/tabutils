@@ -2059,16 +2059,18 @@ tabutils._tabClickingOptions = function() {
   };
 
   //浏览历史菜单
-  TU_hookCode("FillHistoryMenu",
-    ["count <= 1", "count == 0"],
-    [/(?=var webNav)/, function() {
-      var tab = document.popupNode;
-      if (!tab || tab.localName != 'tab')
-        tab = gBrowser.selectedTab;
-      aParent.value = tab._tPos;
-    }],
-    ["gBrowser.webNavigation", "tab.linkedBrowser.webNavigation"]
-  );
+  if (tabutils.fxVersion < 43) { // Bug 1148505 [Fx43]
+    TU_hookCode("FillHistoryMenu",
+      ["count <= 1", "count == 0"],
+      [/(?=var webNav)/, function() {
+        var tab = document.popupNode;
+        if (!tab || tab.localName != 'tab')
+          tab = gBrowser.selectedTab;
+        aParent.value = tab._tPos;
+      }],
+      ["gBrowser.webNavigation", "tab.linkedBrowser.webNavigation"]
+    );
+  }
   TU_hookCode("gotoHistoryIndex",
     ["gBrowser.selectedTab", "tab", "g"],
     ["gBrowser", "tab.linkedBrowser", "g"],
@@ -2191,6 +2193,7 @@ tabutils._tabClickingOptions = function() {
         }
         break;
       case 11: //Session History Menu
+        if (tabutils.fxVersion >= 43) return; // Bug 1148505 [Fx43]
         var backForwardMenu = $("backForwardMenu");
         document.popupNode = gBrowser.mContextTab;
         backForwardMenu.setAttribute("onpopuphidden", "if (event.target == this) document.popupNode = null;");
