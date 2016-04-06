@@ -334,6 +334,9 @@ tabutils._openUILinkInTab = function() {
       params.inBackground = TU_getPref('extensions.tabutils.loadUrlInBackground', false);
       params.disallowInheritPrincipal = !mayInheritPrincipal;
       params.event = aTriggeringEvent || {};
+      var tab = gBrowser.mCurrentTab;
+      if(tab.label == '新标签页' || tab.label == '您已进入隐私浏览模式')
+		where='current';
     }],
     [/.*loadURIWithFlags.*(?=[\s\S]*(let params[\s\S]*openUILinkIn.*))/, function(s, s1) s1.replace("where", '"current"')],
     ["aTriggeringEvent.preventDefault();", ""],
@@ -345,7 +348,8 @@ tabutils._openUILinkInTab = function() {
   if (BrowserSearch.searchBar)
   TU_hookCode("BrowserSearch.searchBar.handleSearchCommand",
     [/(\(aEvent && aEvent.altKey\)) \^ (newTabPref)/, "($1 || $2) && !($1 && $2 && TU_getPref('extensions.tabutils.invertAlt', true)) && !isTabEmpty(gBrowser.selectedTab)"],
-    [/"tab"/, "TU_getPref('extensions.tabutils.loadSearchInBackground', false) ? 'background' : 'foreground'"]
+    [/"tab"/, "TU_getPref('extensions.tabutils.loadSearchInBackground', false) ? 'background' : 'foreground'"],
+    [/where = "tab";/, "where = 'tab';var tab = gBrowser.mCurrentTab;if(tab.label == '新标签页' || tab.label == '您已进入隐私浏览模式'){where='current';}"]
   );
 
   //右键点击书签
