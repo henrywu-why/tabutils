@@ -420,7 +420,8 @@ tabutils._openLinkInTab = function() {
   }).toString().replace(/^.*{|}$/g, ""));
 
   //外来链接
-  TU_hookCode("nsBrowserAccess.prototype.openURI", '"browser.link.open_newwindow"', 'isExternal ? "browser.link.open_external" : $&');
+  // TU_hookCode("nsBrowserAccess.prototype.openURI", '"browser.link.open_newwindow"', 'isExternal ? "browser.link.open_external" : $&');
+  TU_hookCode("nsBrowserAccess.prototype.openURI", 'aWhere = gPrefService.getIntPref("browser.link.open_newwindow");', '{ $& var tab = gBrowser.mCurrentTab;if(tab.label == "新标签页" || tab.label == "您已进入隐私浏览模式"){aWhere = "current";}}');
 
   // L-click
   TU_hookCode("contentAreaClick", /.*handleLinkClick.*/g, "if (event.button || event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) $&");
@@ -1907,7 +1908,7 @@ tabutils._multiTabHandler = function() {
     }
   }, true);
 
-  TU_hookCode(typeof gBrowser.mTabContainer._setEffectAllowedForDataTransfer === 'function' ? 
+  TU_hookCode(typeof gBrowser.mTabContainer._setEffectAllowedForDataTransfer === 'function' ?
     "gBrowser.mTabContainer._setEffectAllowedForDataTransfer" : // Firefox 43 and older
     "gBrowser.mTabContainer._getDropEffectForTabDrag", // Firefox 44 and later
     ["dt.mozItemCount > 1", "false"]
